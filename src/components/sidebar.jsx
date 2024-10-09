@@ -21,9 +21,6 @@ const Sidebar = ({ list }) => {
   const magnitudeselection = (event) => {
     dispatch({ type: "magnitude-selection", payload: event.target.value });
   };
-  const getData = async () => {
-    console.log(state?.year, state?.magnitude);
-  };
   return (
     <div className="relative h-full">
       <h2 className="text-center text-lg capitalize bg-blue-600/75 rounded-t-lg text-white p-2">
