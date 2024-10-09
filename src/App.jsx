@@ -1,47 +1,53 @@
-import { useState, useTransition } from "react";
+import { useReducer, createContext, useEffect } from "react";
+import { HashRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/home";
+import Map from "./pages/map";
+export const HazardContext = createContext();
 function App() {
-  const fruits = [
-    "Apple",
-    "Banana",
-    "Orange",
-    "Mango",
-    "Pineapple",
-    "Strawberry",
-    "Blueberry",
-    "Grapes",
-    "Peach",
-    "Watermelon",
-    "Kiwi",
-    "Papaya",
-    "Cherry",
-    "Pomegranate",
-    "Lemon",
-  ];
-  const [list, setList] = useState([]);
-  const [isPending, startTransition] = useTransition();
-  const size = 1000;
+  const appstate = {
+    magnitude: 4,
+    year: "2014",
+    show_drawer: false,
+  };
+  const Hazardreducer = (state, action) => {
+    switch (action.type) {
+      case "magnitude-selection":
+        return {
+          ...state,
+          magnitude: action.payload,
+        };
+      case "year-selection":
+        return {
+          ...state,
+          year: action.payload,
+        };
+      case "show-drawer":
+        return {
+          ...state,
+          show_drawer: !state.show_drawer,
+        };
+      default:
+        return state;
+    }
+  };
+  const [state, dispatch] = useReducer(Hazardreducer, appstate, (args) => {
+    const isstored = window.localStorage.getItem("earthquake");
+    return JSON.parse(isstored) ?? args;
+  });
+  useEffect(() => {
+    window.localStorage.setItem("earthquake", JSON.stringify(state));
+  }, [state]);
   return (
-    <>
-      <input
-        type="search"
-        onChange={(e) => {
-          startTransition(() => {
-            const datalist = [];
-            for (let i = 0; i < size; i++) {
-              datalist.push(e.target.value);
-            }
-            setList(datalist);
-          });
-        }}
-      />
-      {isPending ? (
-        <div>Loading...</div>
-      ) : (
-        list.map((list) => {
-          return <div key={list}>{list}</div>;
-        })
-      )}
-    </>
+    <HazardContext.Provider value={{ state, dispatch }}>
+      <main className="relative">
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="map" element={<Map />} />
+          </Routes>
+        </HashRouter>
+      </main>
+    </HazardContext.Provider>
   );
 }
 
